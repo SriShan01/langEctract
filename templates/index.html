@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Information Extractor</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 900px;
+            margin: 40px auto;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 30px;
+        }
+        .entity {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+        .entity h4 {
+            margin: 0 0 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Medical Clinical Text Extractor</h2>
+
+<textarea id="inputText" placeholder="Paste clinical note here..."></textarea>
+<br>
+<button onclick="extractData()">Extract</button>
+
+<div class="result" id="result"></div>
+
+<script>
+async function extractData() {
+    const text = document.getElementById("inputText").value;
+
+    const response = await fetch("/extract", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+    });
+
+    const data = await response.json();
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "";
+
+    data.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "entity";
+
+        let attributes = "";
+        for (const key in item.attributes) {
+            attributes += `<li><strong>${key}</strong>: ${item.attributes[key]}</li>`;
+        }
+
+        div.innerHTML = `
+            <h4>${item.class}</h4>
+            <p><strong>Text:</strong> ${item.text}</p>
+            <ul>${attributes}</ul>
+        `;
+
+        resultDiv.appendChild(div);
+    });
+}
+</script>
+
+</body>
+</html>
